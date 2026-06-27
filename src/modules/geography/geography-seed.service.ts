@@ -34,7 +34,8 @@ export class GeographySeedService {
         data: states.map((s: any) => ({ id: String(s.id), code: s.sigla, name: s.nome })),
         skipDuplicates: true,
       })
-      this.logger.log(`${states.length} estados inseridos.`)
+      await this.prisma.state.update({ where: { id: '15' }, data: { active: true } })
+      this.logger.log(`${states.length} estados inseridos. Pará ativado.`)
     } catch (err) {
       this.logger.error('Erro ao buscar estados do IBGE', err)
     }
@@ -82,6 +83,8 @@ export class GeographySeedService {
       this.logger.warn('Belém não encontrada no banco. Pulando bairros/ruas.')
       return
     }
+
+    await this.prisma.city.update({ where: { id: city.id }, data: { active: true } })
 
     // Carregar dados do JSON gerado pelo OpenStreetMap
     const jsonPath = path.join(process.cwd(), 'bairros-ruas-belem.json')

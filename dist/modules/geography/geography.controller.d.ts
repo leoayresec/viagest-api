@@ -13,11 +13,13 @@ export declare class GeographyController {
     findStates(): Promise<{
         id: string;
         name: string;
+        active: boolean;
         code: string;
     }[]>;
     findCities(stateId: string): Promise<{
         id: string;
         name: string;
+        active: boolean;
         stateId: string;
         ibgeCode: string;
     }[]>;

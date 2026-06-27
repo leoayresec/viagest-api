@@ -5,11 +5,13 @@ export declare class GeographyService {
     findStates(): Promise<{
         id: string;
         name: string;
+        active: boolean;
         code: string;
     }[]>;
     findCitiesByState(stateId: string): Promise<{
         id: string;
         name: string;
+        active: boolean;
         stateId: string;
         ibgeCode: string;
     }[]>;

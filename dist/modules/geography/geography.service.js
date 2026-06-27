@@ -18,10 +18,10 @@ let GeographyService = class GeographyService {
         this.prisma = prisma;
     }
     async findStates() {
-        return this.prisma.state.findMany({ orderBy: { name: 'asc' } });
+        return this.prisma.state.findMany({ where: { active: true }, orderBy: { name: 'asc' } });
     }
     async findCitiesByState(stateId) {
-        return this.prisma.city.findMany({ where: { stateId }, orderBy: { name: 'asc' } });
+        return this.prisma.city.findMany({ where: { stateId, active: true }, orderBy: { name: 'asc' } });
     }
     async findNeighborhoods(cityId) {
         return this.prisma.neighborhood.findMany({ where: { cityId }, orderBy: { name: 'asc' } });

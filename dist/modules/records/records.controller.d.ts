@@ -11,11 +11,13 @@ export declare class RecordsController {
                     state: {
                         id: string;
                         name: string;
+                        active: boolean;
                         code: string;
                     };
                 } & {
                     id: string;
                     name: string;
+                    active: boolean;
                     stateId: string;
                     ibgeCode: string;
                 };
@@ -77,11 +79,13 @@ export declare class RecordsController {
                     state: {
                         id: string;
                         name: string;
+                        active: boolean;
                         code: string;
                     };
                 } & {
                     id: string;
                     name: string;
+                    active: boolean;
                     stateId: string;
                     ibgeCode: string;
                 };
@@ -140,11 +144,13 @@ export declare class RecordsController {
                     state: {
                         id: string;
                         name: string;
+                        active: boolean;
                         code: string;
                     };
                 } & {
                     id: string;
                     name: string;
+                    active: boolean;
                     stateId: string;
                     ibgeCode: string;
                 };

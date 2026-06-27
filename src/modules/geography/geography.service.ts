@@ -6,11 +6,11 @@ export class GeographyService {
   constructor(private prisma: PrismaService) {}
 
   async findStates() {
-    return this.prisma.state.findMany({ orderBy: { name: 'asc' } })
+    return this.prisma.state.findMany({ where: { active: true }, orderBy: { name: 'asc' } })
   }
 
   async findCitiesByState(stateId: string) {
-    return this.prisma.city.findMany({ where: { stateId }, orderBy: { name: 'asc' } })
+    return this.prisma.city.findMany({ where: { stateId, active: true }, orderBy: { name: 'asc' } })
   }
 
   async findNeighborhoods(cityId: string) {

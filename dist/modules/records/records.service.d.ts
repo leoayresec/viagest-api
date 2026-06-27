@@ -11,11 +11,13 @@ export declare class RecordsService {
                     state: {
                         id: string;
                         name: string;
+                        active: boolean;
                         code: string;
                     };
                 } & {
                     id: string;
                     name: string;
+                    active: boolean;
                     stateId: string;
                     ibgeCode: string;
                 };
@@ -83,11 +85,13 @@ export declare class RecordsService {
                     state: {
                         id: string;
                         name: string;
+                        active: boolean;
                         code: string;
                     };
                 } & {
                     id: string;
                     name: string;
+                    active: boolean;
                     stateId: string;
                     ibgeCode: string;
                 };
@@ -146,11 +150,13 @@ export declare class RecordsService {
                     state: {
                         id: string;
                         name: string;
+                        active: boolean;
                         code: string;
                     };
                 } & {
                     id: string;
                     name: string;
+                    active: boolean;
                     stateId: string;
                     ibgeCode: string;
                 };

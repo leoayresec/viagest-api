@@ -79,7 +79,8 @@ let GeographySeedService = GeographySeedService_1 = class GeographySeedService {
                 data: states.map((s) => ({ id: String(s.id), code: s.sigla, name: s.nome })),
                 skipDuplicates: true,
             });
-            this.logger.log(`${states.length} estados inseridos.`);
+            await this.prisma.state.update({ where: { id: '15' }, data: { active: true } });
+            this.logger.log(`${states.length} estados inseridos. Pará ativado.`);
         }
         catch (err) {
             this.logger.error('Erro ao buscar estados do IBGE', err);
@@ -125,6 +126,7 @@ let GeographySeedService = GeographySeedService_1 = class GeographySeedService {
             this.logger.warn('Belém não encontrada no banco. Pulando bairros/ruas.');
             return;
         }
+        await this.prisma.city.update({ where: { id: city.id }, data: { active: true } });
         const jsonPath = path.join(process.cwd(), 'bairros-ruas-belem.json');
         if (!fs.existsSync(jsonPath)) {
             this.logger.warn('bairros-ruas-belem.json não encontrado. Pulando.');

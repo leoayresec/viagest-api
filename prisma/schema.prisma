@@ -55,6 +55,7 @@ model State {
   id     String @id
   code   String @unique
   name   String
+  active Boolean @default(false)
   cities City[]
 }
 
@@ -63,6 +64,7 @@ model City {
   stateId       String
   name          String
   ibgeCode      String         @unique
+  active        Boolean        @default(false)
   state         State          @relation(fields: [stateId], references: [id])
   neighborhoods Neighborhood[]
 
