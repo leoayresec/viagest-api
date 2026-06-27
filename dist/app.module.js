@@ -14,12 +14,13 @@ const security_module_1 = require("./core/security/security.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const users_module_1 = require("./modules/users/users.module");
 const records_module_1 = require("./modules/records/records.module");
+const geography_module_1 = require("./modules/geography/geography.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, security_module_1.SecurityModule, auth_module_1.AuthModule, users_module_1.UsersModule, records_module_1.RecordsModule],
+        imports: [prisma_module_1.PrismaModule, security_module_1.SecurityModule, auth_module_1.AuthModule, users_module_1.UsersModule, records_module_1.RecordsModule, geography_module_1.GeographyModule],
         controllers: [],
         providers: [
             {

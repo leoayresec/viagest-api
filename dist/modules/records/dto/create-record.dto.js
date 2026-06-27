@@ -24,11 +24,11 @@ const SERVICE_TYPES = [
 ];
 class CreateRecordDto {
     date;
-    neighborhood;
-    road;
+    roadId;
     serviceType;
-    supervisor;
-    recorder;
+    supervisorId;
+    recorderId;
+    recorderName;
     data;
 }
 exports.CreateRecordDto = CreateRecordDto;
@@ -39,11 +39,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateRecordDto.prototype, "neighborhood", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateRecordDto.prototype, "road", void 0);
+], CreateRecordDto.prototype, "roadId", void 0);
 __decorate([
     (0, class_validator_1.IsEnum)(SERVICE_TYPES),
     __metadata("design:type", String)
@@ -52,12 +48,17 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateRecordDto.prototype, "supervisor", void 0);
+], CreateRecordDto.prototype, "supervisorId", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateRecordDto.prototype, "recorder", void 0);
+], CreateRecordDto.prototype, "recorderId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateRecordDto.prototype, "recorderName", void 0);
 __decorate([
     (0, class_validator_1.IsObject)(),
     __metadata("design:type", Object)

@@ -2,11 +2,11 @@ declare const SERVICE_TYPES: readonly ["limpeza", "obs_limpeza", "escavacao", "c
 export type ServiceType = (typeof SERVICE_TYPES)[number];
 export declare class CreateRecordDto {
     date: string;
-    neighborhood: string;
-    road: string;
+    roadId: string;
     serviceType: ServiceType;
-    supervisor?: string;
-    recorder?: string;
+    supervisorId?: string;
+    recorderId?: string;
+    recorderName?: string;
     data: Record<string, any>;
 }
 export {};

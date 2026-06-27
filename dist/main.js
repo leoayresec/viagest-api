@@ -4,6 +4,7 @@ require("dotenv/config");
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const auth_service_1 = require("./modules/auth/auth.service");
+const geography_seed_service_1 = require("./modules/geography/geography-seed.service");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
@@ -13,6 +14,8 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
     const authService = app.get(auth_service_1.AuthService);
     await authService.seedDefaults();
+    const geoSeed = app.get(geography_seed_service_1.GeographySeedService);
+    await geoSeed.seed();
     await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

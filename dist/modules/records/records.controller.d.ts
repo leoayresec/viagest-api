@@ -5,35 +5,128 @@ export declare class RecordsController {
     private recordsService;
     constructor(recordsService: RecordsService);
     create(dto: CreateRecordDto, userId: string): Promise<{
-        road: string;
+        road: ({
+            neighborhood: {
+                city: {
+                    state: {
+                        id: string;
+                        name: string;
+                        code: string;
+                    };
+                } & {
+                    id: string;
+                    name: string;
+                    stateId: string;
+                    ibgeCode: string;
+                };
+            } & {
+                id: string;
+                name: string;
+                cityId: string;
+            };
+        } & {
+            id: string;
+            name: string;
+            lengthM: number;
+            widthM: number;
+            status: string;
+            neighborhoodId: string;
+        }) | null;
+        supervisor: {
+            id: string;
+            login: string;
+            password: string;
+            name: string;
+            active: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            roleId: string;
+        } | null;
+        recorder: {
+            id: string;
+            login: string;
+            password: string;
+            name: string;
+            active: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            roleId: string;
+        } | null;
+    } & {
         id: string;
         createdAt: Date;
         data: import("@prisma/client/runtime/client").JsonValue;
         date: Date;
-        neighborhood: string;
+        roadId: string | null;
         serviceType: import("@prisma/client").$Enums.ServiceType;
-        supervisor: string | null;
-        recorder: string | null;
+        supervisorId: string | null;
+        recorderId: string | null;
         userId: string | null;
     }>;
     createBatch(dto: CreateRecordsBatchDto, userId: string): Promise<{
         count: number;
     }>;
-    findAll(date?: string, start?: string, end?: string, neighborhood?: string, road?: string, recorder?: string): Promise<({
+    findAll(date?: string, start?: string, end?: string, roadId?: string, recorderId?: string): Promise<({
         user: {
             id: string;
             name: string;
         } | null;
+        road: ({
+            neighborhood: {
+                city: {
+                    state: {
+                        id: string;
+                        name: string;
+                        code: string;
+                    };
+                } & {
+                    id: string;
+                    name: string;
+                    stateId: string;
+                    ibgeCode: string;
+                };
+            } & {
+                id: string;
+                name: string;
+                cityId: string;
+            };
+        } & {
+            id: string;
+            name: string;
+            lengthM: number;
+            widthM: number;
+            status: string;
+            neighborhoodId: string;
+        }) | null;
+        supervisor: {
+            id: string;
+            login: string;
+            password: string;
+            name: string;
+            active: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            roleId: string;
+        } | null;
+        recorder: {
+            id: string;
+            login: string;
+            password: string;
+            name: string;
+            active: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            roleId: string;
+        } | null;
     } & {
-        road: string;
         id: string;
         createdAt: Date;
         data: import("@prisma/client/runtime/client").JsonValue;
         date: Date;
-        neighborhood: string;
+        roadId: string | null;
         serviceType: import("@prisma/client").$Enums.ServiceType;
-        supervisor: string | null;
-        recorder: string | null;
+        supervisorId: string | null;
+        recorderId: string | null;
         userId: string | null;
     })[]>;
     findOne(id: string): Promise<{
@@ -41,16 +134,62 @@ export declare class RecordsController {
             id: string;
             name: string;
         } | null;
+        road: ({
+            neighborhood: {
+                city: {
+                    state: {
+                        id: string;
+                        name: string;
+                        code: string;
+                    };
+                } & {
+                    id: string;
+                    name: string;
+                    stateId: string;
+                    ibgeCode: string;
+                };
+            } & {
+                id: string;
+                name: string;
+                cityId: string;
+            };
+        } & {
+            id: string;
+            name: string;
+            lengthM: number;
+            widthM: number;
+            status: string;
+            neighborhoodId: string;
+        }) | null;
+        supervisor: {
+            id: string;
+            login: string;
+            password: string;
+            name: string;
+            active: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            roleId: string;
+        } | null;
+        recorder: {
+            id: string;
+            login: string;
+            password: string;
+            name: string;
+            active: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            roleId: string;
+        } | null;
     } & {
-        road: string;
         id: string;
         createdAt: Date;
         data: import("@prisma/client/runtime/client").JsonValue;
         date: Date;
-        neighborhood: string;
+        roadId: string | null;
         serviceType: import("@prisma/client").$Enums.ServiceType;
-        supervisor: string | null;
-        recorder: string | null;
+        supervisorId: string | null;
+        recorderId: string | null;
         userId: string | null;
     }>;
     remove(id: string): Promise<{

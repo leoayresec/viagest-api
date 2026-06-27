@@ -30,11 +30,10 @@ export class RecordsController {
     @Query('date') date?: string,
     @Query('start') start?: string,
     @Query('end') end?: string,
-    @Query('neighborhood') neighborhood?: string,
-    @Query('road') road?: string,
-    @Query('recorder') recorder?: string,
+    @Query('roadId') roadId?: string,
+    @Query('recorderId') recorderId?: string,
   ) {
-    return this.recordsService.findAll({ date, start, end, neighborhood, road, recorder })
+    return this.recordsService.findAll({ date, start, end, roadId, recorderId })
   }
 
   @Get(':id')

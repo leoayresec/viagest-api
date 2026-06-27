@@ -32,8 +32,8 @@ let RecordsController = class RecordsController {
     createBatch(dto, userId) {
         return this.recordsService.createBatch(dto, userId);
     }
-    findAll(date, start, end, neighborhood, road, recorder) {
-        return this.recordsService.findAll({ date, start, end, neighborhood, road, recorder });
+    findAll(date, start, end, roadId, recorderId) {
+        return this.recordsService.findAll({ date, start, end, roadId, recorderId });
     }
     findOne(id) {
         return this.recordsService.findOne(id);
@@ -70,11 +70,10 @@ __decorate([
     __param(0, (0, common_1.Query)('date')),
     __param(1, (0, common_1.Query)('start')),
     __param(2, (0, common_1.Query)('end')),
-    __param(3, (0, common_1.Query)('neighborhood')),
-    __param(4, (0, common_1.Query)('road')),
-    __param(5, (0, common_1.Query)('recorder')),
+    __param(3, (0, common_1.Query)('roadId')),
+    __param(4, (0, common_1.Query)('recorderId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], RecordsController.prototype, "findAll", null);
 __decorate([

@@ -19,21 +19,22 @@ export class CreateRecordDto {
   date: string
 
   @IsString()
-  neighborhood: string
-
-  @IsString()
-  road: string
+  roadId: string
 
   @IsEnum(SERVICE_TYPES as any)
   serviceType: ServiceType
 
   @IsOptional()
   @IsString()
-  supervisor?: string
+  supervisorId?: string
 
   @IsOptional()
   @IsString()
-  recorder?: string
+  recorderId?: string
+
+  @IsOptional()
+  @IsString()
+  recorderName?: string
 
   @IsObject()
   data: Record<string, any>

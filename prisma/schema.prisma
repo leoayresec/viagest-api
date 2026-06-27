@@ -7,24 +7,22 @@ datasource db {
 }
 
 model Role {
-  id          String       @id @default(uuid())
-  name        String       @unique
-  description String?
-  active      Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  users           User[]
+  id              String           @id @default(uuid())
+  name            String           @unique
+  description     String?
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   rolePermissions RolePermission[]
+  users           User[]
 }
 
 model Permission {
-  id          String       @id @default(uuid())
-  key         String       @unique // ex: "users:read", "records:write"
-  description String?
-  group       String       // ex: "users", "records", "reports"
-  createdAt   DateTime     @default(now())
-
+  id              String           @id @default(uuid())
+  key             String           @unique
+  description     String?
+  group           String
+  createdAt       DateTime         @default(now())
   rolePermissions RolePermission[]
 }
 
@@ -32,11 +30,189 @@ model RolePermission {
   id           String     @id @default(uuid())
   roleId       String
   permissionId String
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, permissionId])
+}
+
+model User {
+  id                String          @id @default(uuid())
+  login             String          @unique
+  password          String
+  name              String
+  active            Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  roleId            String
+  role              Role            @relation(fields: [roleId], references: [id])
+  records           ServiceRecord[] @relation("RecordUser")
+  supervisedRecords ServiceRecord[] @relation("Supervisor")
+  recordedRecords   ServiceRecord[] @relation("Recorder")
+}
+
+model State {
+  id     String @id
+  code   String @unique
+  name   String
+  cities City[]
+}
+
+model City {
+  id            String         @id
+  stateId       String
+  name          String
+  ibgeCode      String         @unique
+  state         State          @relation(fields: [stateId], references: [id])
+  neighborhoods Neighborhood[]
+
+  @@index([stateId])
+}
+
+model Neighborhood {
+  id     String @id @default(uuid())
+  cityId String
+  name   String
+  city   City   @relation(fields: [cityId], references: [id])
+  roads  Road[]
+
+  @@unique([cityId, name])
+  @@index([cityId])
+}
+
+model Road {
+  id             String          @id @default(uuid())
+  name           String
+  lengthM        Float           @default(0)
+  widthM         Float           @default(0)
+  status         String          @default("ativa")
+  neighborhoodId String
+  neighborhood   Neighborhood    @relation(fields: [neighborhoodId], references: [id])
+  records        ServiceRecord[]
+
+  @@unique([neighborhoodId, name])
+  @@index([neighborhoodId])
+}
+
+model ServiceRecord {
+  id           String      @id @default(uuid())
+  date         DateTime
+  serviceType  ServiceType
+  data         Json
+  createdAt    DateTime    @default(now())
+  userId       String?
+  roadId       String?
+  supervisorId String?
+  recorderId   String?
+  supervisor   User?       @relation("Supervisor", fields: [supervisorId], references: [id])
+  recorder     User?       @relation("Recorder", fields: [recorderId], references: [id])
+  road         Road?       @relation(fields: [roadId], references: [id])
+  user         User?       @relation("RecordUser", fields: [userId], references: [id])
+
+  @@index([date])
+  @@index([roadId])
+}
+
+model SpreadsheetTemplate {
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  version     Int              @default(1)
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  mappings    FieldMapping[]
+  imports     ImportHistory[]
+  columns     TemplateColumn[]
+
+  @@map("spreadsheet_templates")
+}
+
+model TemplateColumn {
+  id              String              @id @default(uuid())
+  templateId      String
+  columnKey       String
+  displayName     String
+  expectedHeaders String[]
+  dataType        String
+  required        Boolean             @default(false)
+  unique          Boolean             @default(false)
+  defaultValue    String?
+  unit            String?
+  allowedValues   String[]
+  weight          Int                 @default(0)
+  sortOrder       Int                 @default(0)
+  template        SpreadsheetTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  rules           ValidationRule[]
+
+  @@map("template_columns")
+}
+
+model ValidationRule {
+  id           String         @id @default(uuid())
+  columnId     String
+  ruleType     String
+  ruleValue    String
+  errorMessage String
+  severity     String
+  column       TemplateColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  @@map("validation_rules")
+}
+
+model FieldMapping {
+  id            String              @id @default(uuid())
+  templateId    String
+  sourceColumn  String
+  targetColumn  String
+  transformRule String?
+  isActive      Boolean             @default(true)
+  template      SpreadsheetTemplate @relation(fields: [templateId], references: [id])
+
+  @@map("field_mappings")
+}
+
+model ImportHistory {
+  id           String              @id @default(uuid())
+  templateId   String
+  fileName     String
+  fileType     String
+  totalRows    Int
+  importedRows Int
+  errorRows    Int
+  status       String
+  importedAt   DateTime            @default(now())
+  importedBy   String
+  errors       ImportError[]
+  template     SpreadsheetTemplate @relation(fields: [templateId], references: [id])
+  dataRows     ImportedData[]
+
+  @@map("import_histories")
+}
+
+model ImportError {
+  id           String        @id @default(uuid())
+  importId     String
+  rowNumber    Int
+  columnName   String?
+  errorType    String
+  errorMessage String
+  rawValue     String?
+  import       ImportHistory @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@map("import_errors")
+}
+
+model ImportedData {
+  id        String        @id @default(uuid())
+  importId  String
+  data      Json
+  rawData   Json?
+  rowNumber Int
+  valid     Boolean       @default(true)
+  import    ImportHistory @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@map("imported_data")
 }
 
 enum ServiceType {
@@ -75,173 +251,4 @@ enum ServiceType {
   redes_auxiliares
   rede_domiciliar
   info_adicionais
-}
-
-enum TeamRole {
-  encarregado
-  apontador
-}
-
-model User {
-  id        String   @id @default(uuid())
-  login     String   @unique
-  password  String   // hash bcrypt
-  name      String
-  roleId    String
-  role      Role     @relation(fields: [roleId], references: [id])
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  records ServiceRecord[]
-}
-
-model ServiceRecord {
-  id           String      @id @default(uuid())
-  date         DateTime
-  neighborhood String
-  road         String
-  serviceType  ServiceType
-  supervisor   String?
-  recorder     String?
-  data         Json        // dados específicos do tipo (comprimento, largura, etc.)
-  createdAt    DateTime    @default(now())
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
-
-  @@index([date])
-  @@index([neighborhood, road])
-  @@index([recorder, date])
-}
-
-model Road {
-  id           String @id @default(uuid())
-  neighborhood String
-  name         String
-  lengthM      Float  @default(0)
-  widthM       Float  @default(0)
-  status       String @default("ativa") // ativa, em_andamento, encerrada, arquivada
-
-  @@unique([neighborhood, name])
-  @@index([neighborhood])
-}
-
-model TeamMember {
-  id   String   @id @default(uuid())
-  name String
-  role TeamRole
-
-  @@unique([name, role])
-}
-
-model SpreadsheetTemplate {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  version     Int      @default(1)
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  columns  TemplateColumn[]
-  mappings FieldMapping[]
-  imports  ImportHistory[]
-
-  @@map("spreadsheet_templates")
-}
-
-model TemplateColumn {
-  id              String             @id @default(uuid())
-  templateId      String
-  template        SpreadsheetTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  columnKey       String
-  displayName     String
-  expectedHeaders String[]
-  dataType        String              // "number", "text", "date", "select"
-  required        Boolean             @default(false)
-  unique          Boolean             @default(false)
-  defaultValue    String?
-  unit            String?
-  allowedValues   String[]
-  weight          Int                 @default(0)
-  sortOrder       Int                 @default(0)
-
-  rules ValidationRule[]
-
-  @@map("template_columns")
-}
-
-model ValidationRule {
-  id           String         @id @default(uuid())
-  columnId     String
-  column       TemplateColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
-
-  ruleType     String // "min", "max", "regex", "custom"
-  ruleValue    String
-  errorMessage String
-  severity     String // "error", "warning"
-
-  @@map("validation_rules")
-}
-
-model FieldMapping {
-  id            String             @id @default(uuid())
-  templateId    String
-  template      SpreadsheetTemplate @relation(fields: [templateId], references: [id])
-
-  sourceColumn  String
-  targetColumn  String
-  transformRule String?
-  isActive      Boolean            @default(true)
-
-  @@map("field_mappings")
-}
-
-model ImportHistory {
-  id          String   @id @default(uuid())
-  templateId  String
-  template    SpreadsheetTemplate @relation(fields: [templateId], references: [id])
-
-  fileName      String
-  fileType      String   // "xlsx", "csv", "google_sheets"
-  totalRows     Int
-  importedRows  Int
-  errorRows     Int
-  status        String   // "pending", "preview", "completed", "failed"
-  importedAt    DateTime @default(now())
-  importedBy    String   // userId
-
-  errors    ImportError[]
-  dataRows  ImportedData[]
-
-  @@map("import_histories")
-}
-
-model ImportError {
-  id          String        @id @default(uuid())
-  importId    String
-  import      ImportHistory @relation(fields: [importId], references: [id], onDelete: Cascade)
-
-  rowNumber   Int
-  columnName  String?
-  errorType   String
-  errorMessage String
-  rawValue    String?
-
-  @@map("import_errors")
-}
-
-model ImportedData {
-  id        String        @id @default(uuid())
-  importId  String
-  import    ImportHistory @relation(fields: [importId], references: [id], onDelete: Cascade)
-
-  data      Json
-  rawData   Json?
-  rowNumber Int
-  valid     Boolean       @default(true)
-
-  @@map("imported_data")
 }

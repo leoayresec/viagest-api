@@ -5,9 +5,10 @@ import { SecurityModule } from './core/security/security.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RecordsModule } from './modules/records/records.module';
+import { GeographyModule } from './modules/geography/geography.module';
 
 @Module({
-  imports: [PrismaModule, SecurityModule, AuthModule, UsersModule, RecordsModule],
+  imports: [PrismaModule, SecurityModule, AuthModule, UsersModule, RecordsModule, GeographyModule],
   controllers: [],
   providers: [
     {

@@ -8,16 +8,28 @@ export class RecordsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateRecordDto, userId?: string) {
+    let recorderId = dto.recorderId
+    if (!recorderId && dto.recorderName) {
+      const user = await this.prisma.user.findFirst({
+        where: { name: dto.recorderName, role: { name: 'apontador' } },
+      })
+      recorderId = user?.id
+    }
+
     return this.prisma.serviceRecord.create({
       data: {
         date: new Date(dto.date),
-        neighborhood: dto.neighborhood,
-        road: dto.road,
+        roadId: dto.roadId,
         serviceType: dto.serviceType as any,
-        supervisor: dto.supervisor,
-        recorder: dto.recorder,
+        supervisorId: dto.supervisorId,
+        recorderId,
         data: dto.data,
         userId,
+      },
+      include: {
+        road: { include: { neighborhood: { include: { city: { include: { state: true } } } } } },
+        supervisor: true,
+        recorder: true,
       },
     })
   }
@@ -27,13 +39,25 @@ export class RecordsService {
       throw new BadRequestException('Nenhum registro para salvar.')
     }
 
-    const data = batch.records.map((r) => ({
+    const resolvedRecords = await Promise.all(
+      batch.records.map(async (r) => {
+        let recorderId = r.recorderId
+        if (!recorderId && r.recorderName) {
+          const user = await this.prisma.user.findFirst({
+            where: { name: r.recorderName, role: { name: 'apontador' } },
+          })
+          recorderId = user?.id
+        }
+        return { ...r, recorderId }
+      }),
+    )
+
+    const data = resolvedRecords.map((r) => ({
       date: new Date(r.date),
-      neighborhood: r.neighborhood,
-      road: r.road,
+      roadId: r.roadId,
       serviceType: r.serviceType as any,
-      supervisor: r.supervisor,
-      recorder: r.recorder,
+      supervisorId: r.supervisorId,
+      recorderId: r.recorderId,
       data: r.data,
       userId,
     }))
@@ -42,7 +66,7 @@ export class RecordsService {
     return { count: result.count }
   }
 
-  async findAll(query: { date?: string; start?: string; end?: string; neighborhood?: string; road?: string; recorder?: string }) {
+  async findAll(query: { date?: string; start?: string; end?: string; roadId?: string; recorderId?: string }) {
     const where: any = {}
 
     if (query.date) {
@@ -60,21 +84,30 @@ export class RecordsService {
       }
     }
 
-    if (query.neighborhood) where.neighborhood = query.neighborhood
-    if (query.road) where.road = query.road
-    if (query.recorder) where.recorder = query.recorder
+    if (query.roadId) where.roadId = query.roadId
+    if (query.recorderId) where.recorderId = query.recorderId
 
     return this.prisma.serviceRecord.findMany({
       where,
       orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
-      include: { user: { select: { id: true, name: true } } },
+      include: {
+        road: { include: { neighborhood: { include: { city: { include: { state: true } } } } } },
+        supervisor: true,
+        recorder: true,
+        user: { select: { id: true, name: true } },
+      },
     })
   }
 
   async findOne(id: string) {
     const record = await this.prisma.serviceRecord.findUnique({
       where: { id },
-      include: { user: { select: { id: true, name: true } } },
+      include: {
+        road: { include: { neighborhood: { include: { city: { include: { state: true } } } } } },
+        supervisor: true,
+        recorder: true,
+        user: { select: { id: true, name: true } },
+      },
     })
     if (!record) throw new NotFoundException('Registro não encontrado.')
     return record
