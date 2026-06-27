@@ -53,28 +53,38 @@ let UsersService = class UsersService {
     }
     async findAll() {
         return this.prisma.user.findMany({
-            select: { id: true, login: true, name: true, profile: true, active: true, createdAt: true, updatedAt: true },
+            select: { id: true, login: true, name: true, role: { select: { name: true } }, active: true, createdAt: true, updatedAt: true },
+            orderBy: { name: 'asc' },
+        }).then((users) => users.map((u) => ({ ...u, role: u.role.name })));
+    }
+    async findRoles() {
+        return this.prisma.role.findMany({
+            select: { id: true, name: true, description: true },
             orderBy: { name: 'asc' },
         });
     }
     async findOne(id) {
         const user = await this.prisma.user.findUnique({
             where: { id },
-            select: { id: true, login: true, name: true, profile: true, active: true, createdAt: true, updatedAt: true },
+            select: { id: true, login: true, name: true, role: { select: { name: true } }, active: true, createdAt: true, updatedAt: true },
         });
         if (!user)
             throw new common_1.NotFoundException('Usuário não encontrado.');
-        return user;
+        return { ...user, role: user.role.name };
     }
     async create(dto) {
         const existing = await this.prisma.user.findUnique({ where: { login: dto.login } });
         if (existing)
             throw new common_1.ConflictException('Este login já existe.');
+        const role = await this.prisma.role.findUnique({ where: { name: dto.roleName } });
+        if (!role)
+            throw new common_1.ConflictException('Perfil inválido.');
         const hashedPassword = await bcrypt.hash(dto.password, 10);
-        return this.prisma.user.create({
-            data: { login: dto.login, password: hashedPassword, name: dto.name, profile: dto.profile },
-            select: { id: true, login: true, name: true, profile: true, active: true, createdAt: true },
+        const user = await this.prisma.user.create({
+            data: { login: dto.login, password: hashedPassword, name: dto.name, roleId: role.id },
+            select: { id: true, login: true, name: true, role: { select: { name: true } }, active: true, createdAt: true },
         });
+        return { ...user, role: user.role.name };
     }
     async update(id, dto) {
         const user = await this.prisma.user.findUnique({ where: { id } });
@@ -90,47 +100,60 @@ let UsersService = class UsersService {
             data.login = dto.login;
         if (dto.name !== undefined)
             data.name = dto.name;
-        if (dto.profile !== undefined)
-            data.profile = dto.profile;
+        if (dto.roleName !== undefined) {
+            const role = await this.prisma.role.findUnique({ where: { name: dto.roleName } });
+            if (!role)
+                throw new common_1.ConflictException('Perfil inválido.');
+            data.roleId = role.id;
+        }
         if (dto.password)
             data.password = await bcrypt.hash(dto.password, 10);
-        return this.prisma.user.update({
+        const updated = await this.prisma.user.update({
             where: { id },
             data,
-            select: { id: true, login: true, name: true, profile: true, active: true, updatedAt: true },
+            select: { id: true, login: true, name: true, role: { select: { name: true } }, active: true, updatedAt: true },
         });
+        return { ...updated, role: updated.role.name };
     }
     async deactivate(id) {
-        const user = await this.prisma.user.findUnique({ where: { id } });
+        const user = await this.prisma.user.findUnique({ where: { id }, include: { role: true } });
         if (!user)
             throw new common_1.NotFoundException('Usuário não encontrado.');
-        const activeAdmins = await this.prisma.user.count({ where: { profile: 'admin', active: true } });
-        if (activeAdmins <= 1 && user.profile === 'admin') {
-            throw new common_1.BadRequestException('Não é possível desativar o único administrador ativo.');
+        const adminRole = await this.prisma.role.findUnique({ where: { name: 'admin' } });
+        if (adminRole) {
+            const activeAdmins = await this.prisma.user.count({ where: { roleId: adminRole.id, active: true } });
+            if (activeAdmins <= 1 && user.roleId === adminRole.id) {
+                throw new common_1.BadRequestException('Não é possível desativar o único administrador ativo.');
+            }
         }
-        return this.prisma.user.update({
+        const updated = await this.prisma.user.update({
             where: { id },
             data: { active: false },
-            select: { id: true, login: true, name: true, profile: true, active: true },
+            select: { id: true, login: true, name: true, role: { select: { name: true } }, active: true },
         });
+        return { ...updated, role: updated.role.name };
     }
     async reactivate(id) {
         const user = await this.prisma.user.findUnique({ where: { id } });
         if (!user)
             throw new common_1.NotFoundException('Usuário não encontrado.');
-        return this.prisma.user.update({
+        const updated = await this.prisma.user.update({
             where: { id },
             data: { active: true },
-            select: { id: true, login: true, name: true, profile: true, active: true },
+            select: { id: true, login: true, name: true, role: { select: { name: true } }, active: true },
         });
+        return { ...updated, role: updated.role.name };
     }
     async remove(id) {
-        const user = await this.prisma.user.findUnique({ where: { id } });
+        const user = await this.prisma.user.findUnique({ where: { id }, include: { role: true } });
         if (!user)
             throw new common_1.NotFoundException('Usuário não encontrado.');
-        const activeAdmins = await this.prisma.user.count({ where: { profile: 'admin', active: true } });
-        if (activeAdmins <= 1 && user.profile === 'admin') {
-            throw new common_1.BadRequestException('Não é possível excluir o único administrador ativo.');
+        const adminRole = await this.prisma.role.findUnique({ where: { name: 'admin' } });
+        if (adminRole) {
+            const activeAdmins = await this.prisma.user.count({ where: { roleId: adminRole.id, active: true } });
+            if (activeAdmins <= 1 && user.roleId === adminRole.id) {
+                throw new common_1.BadRequestException('Não é possível excluir o único administrador ativo.');
+            }
         }
         await this.prisma.user.delete({ where: { id } });
     }

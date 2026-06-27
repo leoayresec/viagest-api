@@ -6,7 +6,8 @@ import { PrismaService } from '../infrastructure/database/prisma.service'
 export interface JwtPayload {
   sub: string
   login: string
-  profile: string
+  roleId: string
+  roleName: string
 }
 
 @Injectable()
@@ -20,8 +21,27 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.prisma.user.findUnique({ where: { id: payload.sub }, select: { id: true, login: true, name: true, profile: true, active: true } })
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      include: {
+        role: {
+          include: {
+            rolePermissions: { include: { permission: true } },
+          },
+        },
+      },
+    })
     if (!user || !user.active) throw new UnauthorizedException('Usuário inativo ou inexistente')
-    return user
+
+    const permissions = user.role.rolePermissions.map((rp) => rp.permission.key)
+
+    return {
+      id: user.id,
+      login: user.login,
+      name: user.name,
+      roleId: user.roleId,
+      role: user.role.name,
+      permissions,
+    }
   }
 }

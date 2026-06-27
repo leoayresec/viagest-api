@@ -11,12 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterDto = void 0;
 const class_validator_1 = require("class-validator");
-const client_1 = require("@prisma/client");
 class RegisterDto {
     login;
     password;
     name;
-    profile;
+    roleName;
 }
 exports.RegisterDto = RegisterDto;
 __decorate([
@@ -35,7 +34,8 @@ __decorate([
     __metadata("design:type", String)
 ], RegisterDto.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsEnum)(client_1.UserProfile),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
     __metadata("design:type", String)
-], RegisterDto.prototype, "profile", void 0);
+], RegisterDto.prototype, "roleName", void 0);
 //# sourceMappingURL=register.dto.js.map

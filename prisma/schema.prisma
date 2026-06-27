@@ -4,12 +4,39 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-
 }
 
-enum UserProfile {
-  admin
-  apontador
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  users           User[]
+  rolePermissions RolePermission[]
+}
+
+model Permission {
+  id          String       @id @default(uuid())
+  key         String       @unique // ex: "users:read", "records:write"
+  description String?
+  group       String       // ex: "users", "records", "reports"
+  createdAt   DateTime     @default(now())
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
 }
 
 enum ServiceType {
@@ -60,7 +87,8 @@ model User {
   login     String   @unique
   password  String   // hash bcrypt
   name      String
-  profile   UserProfile
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

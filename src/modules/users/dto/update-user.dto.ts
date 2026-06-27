@@ -1,5 +1,4 @@
-import { IsString, IsEnum, IsOptional, MinLength } from 'class-validator'
-import { UserProfile } from '@prisma/client'
+import { IsString, IsOptional, MinLength } from 'class-validator'
 
 export class UpdateUserDto {
   @IsOptional()
@@ -13,8 +12,9 @@ export class UpdateUserDto {
   name?: string
 
   @IsOptional()
-  @IsEnum(UserProfile)
-  profile?: UserProfile
+  @IsString()
+  @MinLength(1)
+  roleName?: string
 
   @IsOptional()
   @IsString()

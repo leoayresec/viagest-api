@@ -11,11 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateUserDto = void 0;
 const class_validator_1 = require("class-validator");
-const client_1 = require("@prisma/client");
 class UpdateUserDto {
     login;
     name;
-    profile;
+    roleName;
     password;
 }
 exports.UpdateUserDto = UpdateUserDto;
@@ -33,9 +32,10 @@ __decorate([
 ], UpdateUserDto.prototype, "name", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(client_1.UserProfile),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
     __metadata("design:type", String)
-], UpdateUserDto.prototype, "profile", void 0);
+], UpdateUserDto.prototype, "roleName", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

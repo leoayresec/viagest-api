@@ -14,7 +14,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const authService = app.get(AuthService);
-  await authService.seedAdmin();
+  await authService.seedDefaults();
 
   await app.listen(process.env.PORT ?? 3000);
 }

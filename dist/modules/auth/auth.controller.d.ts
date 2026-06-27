@@ -10,15 +10,22 @@ export declare class AuthController {
             id: string;
             login: string;
             name: string;
-            profile: import("@prisma/client").$Enums.UserProfile;
+            role: string;
+            permissions: string[];
         };
     }>;
     register(dto: RegisterDto): Promise<{
         id: string;
         login: string;
         name: string;
-        profile: import("@prisma/client").$Enums.UserProfile;
         active: boolean;
         createdAt: Date;
+    }>;
+    getProfile(userId: string): Promise<{
+        id: string;
+        login: string;
+        name: string;
+        role: string;
+        permissions: string[];
     }>;
 }

@@ -19,7 +19,7 @@ const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
 const roles_decorator_1 = require("../../core/security/roles.decorator");
-const roles_guard_1 = require("../../core/security/roles.guard");
+const current_user_decorator_1 = require("../../core/security/current-user.decorator");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -30,6 +30,9 @@ let AuthController = class AuthController {
     }
     register(dto) {
         return this.authService.register(dto);
+    }
+    getProfile(userId) {
+        return this.authService.getProfile(userId);
     }
 };
 exports.AuthController = AuthController;
@@ -43,13 +46,21 @@ __decorate([
 ], AuthController.prototype, "login", null);
 __decorate([
     (0, common_1.Post)('register'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('admin'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, roles_decorator_1.RequirePermissions)('users:write'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "register", null);
+__decorate([
+    (0, common_1.Get)('profile'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "getProfile", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

@@ -29,6 +29,9 @@ let UsersController = class UsersController {
     findAll() {
         return this.usersService.findAll();
     }
+    findRoles() {
+        return this.usersService.findRoles();
+    }
     findOne(id) {
         return this.usersService.findOne(id);
     }
@@ -37,8 +40,8 @@ let UsersController = class UsersController {
     }
     update(id, dto, currentUserId) {
         if (id === currentUserId) {
-            if (dto.profile !== undefined) {
-                const { profile, ...rest } = dto;
+            if (dto.roleName !== undefined) {
+                const { roleName, ...rest } = dto;
                 return this.usersService.update(id, rest);
             }
         }
@@ -63,12 +66,21 @@ let UsersController = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Get)(),
+    (0, roles_decorator_1.RequirePermissions)('users:read'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('roles'),
+    (0, roles_decorator_1.RequirePermissions)('users:read'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "findRoles", null);
+__decorate([
     (0, common_1.Get)(':id'),
+    (0, roles_decorator_1.RequirePermissions)('users:read'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -76,6 +88,7 @@ __decorate([
 ], UsersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.RequirePermissions)('users:write'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
@@ -83,6 +96,7 @@ __decorate([
 ], UsersController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, roles_decorator_1.RequirePermissions)('users:write'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)('id')),
@@ -92,6 +106,7 @@ __decorate([
 ], UsersController.prototype, "update", null);
 __decorate([
     (0, common_1.Put)(':id/deactivate'),
+    (0, roles_decorator_1.RequirePermissions)('users:write'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)('id')),
     __metadata("design:type", Function),
@@ -100,6 +115,7 @@ __decorate([
 ], UsersController.prototype, "deactivate", null);
 __decorate([
     (0, common_1.Put)(':id/reactivate'),
+    (0, roles_decorator_1.RequirePermissions)('users:write'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -107,6 +123,7 @@ __decorate([
 ], UsersController.prototype, "reactivate", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.RequirePermissions)('users:write'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)('id')),
     __metadata("design:type", Function),
@@ -116,7 +133,6 @@ __decorate([
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('admin'),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

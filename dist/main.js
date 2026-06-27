@@ -12,7 +12,7 @@ async function bootstrap() {
     });
     app.setGlobalPrefix('api');
     const authService = app.get(auth_service_1.AuthService);
-    await authService.seedAdmin();
+    await authService.seedDefaults();
     await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

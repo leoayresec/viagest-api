@@ -19,11 +19,16 @@ let RolesGuard = class RolesGuard {
         this.reflector = reflector;
     }
     canActivate(context) {
-        const requiredRoles = this.reflector.getAllAndOverride(roles_decorator_1.ROLES_KEY, [context.getHandler(), context.getClass()]);
-        if (!requiredRoles)
+        const requiredPermissions = this.reflector.getAllAndOverride(roles_decorator_1.PERMISSIONS_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (!requiredPermissions || requiredPermissions.length === 0)
             return true;
         const { user } = context.switchToHttp().getRequest();
-        return requiredRoles.includes(user.profile);
+        if (!user || !user.permissions)
+            return false;
+        return requiredPermissions.every((p) => user.permissions.includes(p));
     }
 };
 exports.RolesGuard = RolesGuard;
