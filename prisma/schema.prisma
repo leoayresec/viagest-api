@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+
+}
+
+enum UserProfile {
+  admin
+  apontador
+}
+
+enum ServiceType {
+  limpeza
+  obs_limpeza
+  escavacao
+  colchao_areia
+  tubo
+  manta_bidim
+  aterro
+  obs_drenagem
+  motor
+  pv
+  bl
+  obs_pvbl
+  espinha_bl
+  terrap
+  obs_terrap
+  subbase
+  cbuq
+  binder
+  pintura_ligacao
+  obs_pav
+  tampao_70
+  fresagem
+  remendo_profundo
+  obs_recuperacao
+  demolicao_calcada
+  demolicao_meiofio
+  colchao_areia_meiofio
+  demolicao_linha_agua
+  linha_agua
+  urb
+  obs_urb
+  urb_controle
+  redes_auxiliares
+  rede_domiciliar
+  info_adicionais
+}
+
+enum TeamRole {
+  encarregado
+  apontador
+}
+
+model User {
+  id        String   @id @default(uuid())
+  login     String   @unique
+  password  String   // hash bcrypt
+  name      String
+  profile   UserProfile
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  records ServiceRecord[]
+}
+
+model ServiceRecord {
+  id           String      @id @default(uuid())
+  date         DateTime
+  neighborhood String
+  road         String
+  serviceType  ServiceType
+  supervisor   String?
+  recorder     String?
+  data         Json        // dados específicos do tipo (comprimento, largura, etc.)
+  createdAt    DateTime    @default(now())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  @@index([date])
+  @@index([neighborhood, road])
+  @@index([recorder, date])
+}
+
+model Road {
+  id           String @id @default(uuid())
+  neighborhood String
+  name         String
+  lengthM      Float  @default(0)
+  widthM       Float  @default(0)
+  status       String @default("ativa") // ativa, em_andamento, encerrada, arquivada
+
+  @@unique([neighborhood, name])
+  @@index([neighborhood])
+}
+
+model TeamMember {
+  id   String   @id @default(uuid())
+  name String
+  role TeamRole
+
+  @@unique([name, role])
+}
+
+model SpreadsheetTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  version     Int      @default(1)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  columns  TemplateColumn[]
+  mappings FieldMapping[]
+  imports  ImportHistory[]
+
+  @@map("spreadsheet_templates")
+}
+
+model TemplateColumn {
+  id              String             @id @default(uuid())
+  templateId      String
+  template        SpreadsheetTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  columnKey       String
+  displayName     String
+  expectedHeaders String[]
+  dataType        String              // "number", "text", "date", "select"
+  required        Boolean             @default(false)
+  unique          Boolean             @default(false)
+  defaultValue    String?
+  unit            String?
+  allowedValues   String[]
+  weight          Int                 @default(0)
+  sortOrder       Int                 @default(0)
+
+  rules ValidationRule[]
+
+  @@map("template_columns")
+}
+
+model ValidationRule {
+  id           String         @id @default(uuid())
+  columnId     String
+  column       TemplateColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  ruleType     String // "min", "max", "regex", "custom"
+  ruleValue    String
+  errorMessage String
+  severity     String // "error", "warning"
+
+  @@map("validation_rules")
+}
+
+model FieldMapping {
+  id            String             @id @default(uuid())
+  templateId    String
+  template      SpreadsheetTemplate @relation(fields: [templateId], references: [id])
+
+  sourceColumn  String
+  targetColumn  String
+  transformRule String?
+  isActive      Boolean            @default(true)
+
+  @@map("field_mappings")
+}
+
+model ImportHistory {
+  id          String   @id @default(uuid())
+  templateId  String
+  template    SpreadsheetTemplate @relation(fields: [templateId], references: [id])
+
+  fileName      String
+  fileType      String   // "xlsx", "csv", "google_sheets"
+  totalRows     Int
+  importedRows  Int
+  errorRows     Int
+  status        String   // "pending", "preview", "completed", "failed"
+  importedAt    DateTime @default(now())
+  importedBy    String   // userId
+
+  errors    ImportError[]
+  dataRows  ImportedData[]
+
+  @@map("import_histories")
+}
+
+model ImportError {
+  id          String        @id @default(uuid())
+  importId    String
+  import      ImportHistory @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  rowNumber   Int
+  columnName  String?
+  errorType   String
+  errorMessage String
+  rawValue    String?
+
+  @@map("import_errors")
+}
+
+model ImportedData {
+  id        String        @id @default(uuid())
+  importId  String
+  import    ImportHistory @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  data      Json
+  rawData   Json?
+  rowNumber Int
+  valid     Boolean       @default(true)
+
+  @@map("imported_data")
+}
